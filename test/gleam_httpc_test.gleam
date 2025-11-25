@@ -1,3 +1,4 @@
+import gleam/list
 import gleam/http.{Get, Head, Options}
 import gleam/http/request
 import gleam/http/response
@@ -160,4 +161,23 @@ pub fn timeout_error_test() {
     |> httpc.timeout(200)
     |> httpc.dispatch(req)
     == Error(httpc.ResponseTimeout)
+}
+
+pub fn httpc_timeout_test() {
+  list.range(1, 100)
+  |> list.each(fn(iteration) {
+    echo iteration
+
+    let req =
+      request.new()
+      |> request.set_method(Get)
+      |> request.set_scheme(http.Https)
+      |> request.set_host("iconify.github.io")
+      |> request.set_path("/icon-sets/json/fluent-emoji.json")
+
+    assert httpc.configure()
+      |> httpc.timeout(600000) //10 minutes
+      |> httpc.dispatch(req)
+      != Error(httpc.ResponseTimeout)
+  })
 }
